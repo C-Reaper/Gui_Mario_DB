@@ -22,7 +22,7 @@ unsigned int playercount;
 
 #define SIGNAL_PLAYER_ID                           (SIGNAL_START + 1)
 
-void QueryLanguage_Proc_Connect(Server* s,Signal sig,Client* c,void* data,int size){
+void QueryLanguage_Proc_Connect(Server* s,Signal sig,Client* c,void* data,PackageSize size){
     QueryLanguage* ql = (QueryLanguage*)((void*)s - offsetof(QueryLanguage,s));
     printf("QueryLanguage_Connect(%d)\n",c->sockfd);
 
@@ -41,9 +41,9 @@ void Setup(AlxWindow* w){
         &ql,
         5900,
         10,
-        (void(*)(void*,Signal,void*,void*,int))QueryLanguage_Proc_Connect,
-        (void(*)(void*,Signal,void*,void*,int))QueryLanguage_StdProc_Disconnect,
-        (void(*)(void*,Signal,void*,void*,int))QueryLanguage_StdProc_Update
+        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_Proc_Connect,
+        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_StdProc_Disconnect,
+        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_StdProc_Update
     );
 
     TT_Iter db_it = QueryLanguage_FindDB(&ql,"players");
