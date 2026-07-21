@@ -1,14 +1,14 @@
 #if defined(__linux__)
 #include "/home/codeleaded/System/Static/Library/QueryLanguage.h"
-#include "/home/codeleaded/System/Static/Library/Networking.h"
+#include "/home/codeleaded/System/Static/Library/Networking_Event.h"
 #include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
 #elif defined(_WINE)
 #include "/home/codeleaded/System/Static/Library/QueryLanguage.h"
-#include "/home/codeleaded/System/Static/Library/Networking.h"
+#include "/home/codeleaded/System/Static/Library/Networking_Event.h"
 #include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
 #elif defined(_WIN32)
 #include "F:/home/codeleaded/System/Static/Library/QueryLanguage.h"
-#include "F:/home/codeleaded/System/Static/Library/Networking.h"
+#include "F:/home/codeleaded/System/Static/Library/Networking_Event.h"
 #include "F:/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
 #elif defined(__APPLE__)
 #error "Apple not supported!"
@@ -20,13 +20,12 @@
 QueryLanguage ql;
 unsigned int playercount;
 
-#define SIGNAL_PLAYER_ID                           (SIGNAL_START + 1)
+#define NET_EVENT_PLAYER_ID                           (NET_EVENT_START + 1)
 
-void QueryLanguage_Proc_Connect(Server* s,Signal sig,Client* c,void* data,PackageSize size){
+void QueryLanguage_Proc_Connect(Net_EventServer* s,Net_EventClient* c,Net_EventPackage* p){
     QueryLanguage* ql = (QueryLanguage*)((void*)s - offsetof(QueryLanguage,s));
-    printf("QueryLanguage_Connect(%d)\n",c->sockfd);
-
-    Client_Signal_Send(c,SIGNAL_PLAYER_ID,&playercount,sizeof(unsigned int));
+    printf("QueryLanguage_Connect(%u)\n",(uint32_t)Net_Client_Id(&c->client));
+    Net_EventClient_Send(c,NET_EVENT_PLAYER_ID,&playercount,sizeof(unsigned int));
     playercount++;
 }
 
@@ -41,9 +40,9 @@ void Setup(AlxWindow* w){
         &ql,
         5900,
         10,
-        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_Proc_Connect,
-        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_StdProc_Disconnect,
-        (void(*)(void*,Signal,void*,void*,PackageSize))QueryLanguage_StdProc_Update
+        (void(*)(void*,Net_EventClient*,Net_EventPackage*))QueryLanguage_Proc_Connect,
+        (void(*)(void*,Net_EventClient*,Net_EventPackage*))QueryLanguage_StdProc_Disconnect,
+        (void(*)(void*,Net_EventClient*,Net_EventPackage*))QueryLanguage_StdProc_Update
     );
 
     TT_Iter db_it = QueryLanguage_FindDB(&ql,"players");
